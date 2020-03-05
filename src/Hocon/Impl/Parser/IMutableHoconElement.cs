@@ -9,19 +9,11 @@ using System.Collections.Generic;
 
 namespace Hocon
 {
-    internal interface IHoconElement : IEquatable<IHoconElement>
-    {
-
-        HoconType Type { get; }
-
-        string Raw { get; }
-    }
-
-        /// <summary>
-        ///     This interface defines the contract needed to implement
-        ///     a HOCON (Human-Optimized Config Object Notation) element.
-        /// </summary>
-        internal interface IMutableHoconElement : IEquatable<IMutableHoconElement>
+    /// <summary>
+    ///     This interface defines the contract needed to implement
+    ///     a HOCON (Human-Optimized Config Object Notation) element.
+    /// </summary>
+    internal interface IMutableHoconElement : IEquatable<IMutableHoconElement>
     {
         IMutableHoconElement Parent { get; }
 
