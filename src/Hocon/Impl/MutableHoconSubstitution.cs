@@ -23,24 +23,24 @@ namespace Hocon
     /// }
     /// </code>
     /// </summary>
-    public sealed class HoconSubstitution : IHoconElement, IHoconLineInfo
+    internal sealed class MutableHoconSubstitution : IMutableHoconElement, IHoconLineInfo
     {
-        private HoconValue _resolvedValue;
+        private MutableHoconValue _resolvedValue;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="HoconSubstitution" /> class.
+        ///     Initializes a new instance of the <see cref="MutableHoconSubstitution" /> class.
         /// </summary>
-        /// <param name="parent">The <see cref="HoconValue" /> parent of this substitution.</param>
+        /// <param name="parent">The <see cref="MutableHoconValue" /> parent of this substitution.</param>
         /// <param name="path">The <see cref="HoconPath" /> that this substitution is pointing to.</param>
         /// <param name="required">Marks wether this substitution uses the ${? notation or not.</param>
         /// ///
         /// <param name="lineInfo">The <see cref="IHoconLineInfo" /> of this substitution, used for exception generation purposes.</param>
-        internal HoconSubstitution(IHoconElement parent, HoconPath path, IHoconLineInfo lineInfo, bool required)
+        internal MutableHoconSubstitution(IMutableHoconElement parent, HoconPath path, IHoconLineInfo lineInfo, bool required)
         {
             if (parent == null)
                 throw new ArgumentNullException(nameof(parent), "HoconSubstitution parent can not be null.");
 
-            if (!(parent is HoconValue))
+            if (!(parent is MutableHoconValue))
                 throw new HoconException("HoconSubstitution parent must be HoconValue.");
 
             Parent = parent;
@@ -49,21 +49,21 @@ namespace Hocon
             Required = required;
             Path = path;
             
-            _parentsToResolveFor.Add(Parent as HoconValue);
+            _parentsToResolveFor.Add(Parent as MutableHoconValue);
         }
 
         public bool Required { get; }
 
         internal bool Removed { get; set; }
         
-        internal HoconField ParentField
+        internal MutableHoconField ParentField
         {
             get
             {
                 var p = Parent;
-                while (p != null && !(p is HoconField))
+                while (p != null && !(p is MutableHoconField))
                     p = p.Parent;
-                return p as HoconField;
+                return p as MutableHoconField;
             }
         }
 
@@ -75,7 +75,7 @@ namespace Hocon
         /// <summary>
         ///     The evaluated value from the Path property
         /// </summary>
-        public HoconValue ResolvedValue
+        public MutableHoconValue ResolvedValue
         {
             get => _resolvedValue;
             internal set
@@ -88,9 +88,9 @@ namespace Hocon
         /// <summary>
         ///     The Hocon node that owned this substitution node
         /// </summary>
-        public IHoconElement Parent { get; }
+        public IMutableHoconElement Parent { get; }
         
-        private readonly List<HoconValue> _parentsToResolveFor = new List<HoconValue>();
+        private readonly List<MutableHoconValue> _parentsToResolveFor = new List<MutableHoconValue>();
 
         public HoconType Type => ResolvedValue?.Type ?? HoconType.Empty;
 
@@ -103,13 +103,13 @@ namespace Hocon
         public string Raw => ResolvedValue?.Raw;
 
         /// <inheritdoc />
-        public IList<HoconValue> GetArray()
+        public IList<MutableHoconValue> GetArray()
         {
             return ResolvedValue?.GetArray();
         }
 
         /// <inheritdoc />
-        public HoconObject GetObject()
+        public MutableHoconObject GetObject()
         {
             return ResolvedValue?.GetObject();
         }
@@ -130,26 +130,26 @@ namespace Hocon
         /// parent here, and all parents will be notified about subsitution resolution via <see cref="ResolvedValue"/>
         /// setter.
         /// </remarks>
-        public IHoconElement Clone(IHoconElement newParent)
+        public IMutableHoconElement Clone(IMutableHoconElement newParent)
         {
             if (newParent == null)
                 throw new ArgumentNullException(nameof(newParent), "HoconSubstitution parent can not be null.");
 
-            if (!(newParent is HoconValue))
+            if (!(newParent is MutableHoconValue))
                 throw new HoconException("HoconSubstitution parent must be HoconValue.");
             
-            _parentsToResolveFor.Add((HoconValue) newParent);
+            _parentsToResolveFor.Add((MutableHoconValue) newParent);
             
             // No copy required, substitutions are never changing state (except setting resolved value)
             return this; 
         }
 
-        public bool Equals(IHoconElement other)
+        public bool Equals(IMutableHoconElement other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            if (other is HoconSubstitution sub)
+            if (other is MutableHoconSubstitution sub)
                 return Path == sub.Path;
 
             return !(_resolvedValue is null) && _resolvedValue.Equals(other);
@@ -170,7 +170,7 @@ namespace Hocon
 
         public override bool Equals(object obj)
         {
-            return obj is IHoconElement element && Equals(element);
+            return obj is IMutableHoconElement element && Equals(element);
         }
 
         public override int GetHashCode()
@@ -178,12 +178,12 @@ namespace Hocon
             return Path.GetHashCode();
         }
 
-        public static bool operator ==(HoconSubstitution left, HoconSubstitution right)
+        public static bool operator ==(MutableHoconSubstitution left, MutableHoconSubstitution right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(HoconSubstitution left, HoconSubstitution right)
+        public static bool operator !=(MutableHoconSubstitution left, MutableHoconSubstitution right)
         {
             return !Equals(left, right);
         }

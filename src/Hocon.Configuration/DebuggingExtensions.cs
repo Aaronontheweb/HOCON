@@ -29,7 +29,7 @@ namespace Hocon
 
             var hoconCount = 0;
 
-            void AppendHocon(HoconValue value, int i)
+            void AppendHocon(MutableHoconValue value, int i)
             {
                 sb.AppendFormat("HOCON{0}", i)
                     .AppendLine()

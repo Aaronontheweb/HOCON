@@ -35,7 +35,7 @@ namespace Hocon.Extensions.Configuration
             return _data;
         }
 
-        private void VisitHoconObject(HoconObject hObject)
+        private void VisitHoconObject(MutableHoconObject hObject)
         {
             foreach (var field in hObject)
             {
@@ -45,12 +45,12 @@ namespace Hocon.Extensions.Configuration
             }
         }
 
-        private void VisitHoconField(HoconField property)
+        private void VisitHoconField(MutableHoconField property)
         {
             VisitObject(property.Value);
         }
 
-        private void VisitObject(HoconValue value)
+        private void VisitObject(MutableHoconValue value)
         {
             switch (value.Type)
             {
@@ -70,7 +70,7 @@ namespace Hocon.Extensions.Configuration
             }
         }
 
-        private void VisitArray(IList<HoconValue> array)
+        private void VisitArray(IList<MutableHoconValue> array)
         {
             for (int index = 0; index < array.Count; index++)
             {
@@ -80,7 +80,7 @@ namespace Hocon.Extensions.Configuration
             }
         }
 
-        private void VisitPrimitive(IHoconElement data)
+        private void VisitPrimitive(IMutableHoconElement data)
         {
             var key = _currentPath;
 

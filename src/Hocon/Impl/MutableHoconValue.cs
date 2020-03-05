@@ -20,30 +20,30 @@ namespace Hocon
     ///     This class represents the root type for a HOCON (Human-Optimized Config Object Notation)
     ///     configuration object.
     /// </summary>
-    public class HoconValue : List<IHoconElement>, IHoconElement
+    internal class MutableHoconValue : List<IMutableHoconElement>, IMutableHoconElement
     {
         private static readonly Regex TimeSpanRegex = new Regex(
             @"^(?<value>([0-9]+(\.[0-9]+)?))\s*(?<unit>(nanoseconds|nanosecond|nanos|nano|ns|microseconds|microsecond|micros|micro|us|milliseconds|millisecond|millis|milli|ms|seconds|second|s|minutes|minute|m|hours|hour|h|days|day|d))$",
             RegexOptions.Compiled);
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="HoconValue" /> class.
+        ///     Initializes a new instance of the <see cref="MutableHoconValue" /> class.
         /// </summary>
-        public HoconValue(IHoconElement parent)
+        public MutableHoconValue(IMutableHoconElement parent)
         {
-            if (parent != null && !(parent is HoconField) && !(parent is HoconArray))
+            if (parent != null && !(parent is MutableHoconField) && !(parent is MutableHoconArray))
                 throw new HoconException("HoconValue parent must be HoconField, HoconArray, or null");
             Parent = parent;
         }
 
-        public ReadOnlyCollection<IHoconElement> Children => AsReadOnly();
+        public ReadOnlyCollection<IMutableHoconElement> Children => AsReadOnly();
 
-        public IHoconElement Parent { get; }
+        public IMutableHoconElement Parent { get; }
 
         public virtual HoconType Type { get; private set; } = HoconType.Empty;
 
         /// <inheritdoc />
-        public virtual HoconObject GetObject()
+        public virtual MutableHoconObject GetObject()
         {
             if (Type == HoconType.Empty)
                 return null;
@@ -62,11 +62,11 @@ namespace Hocon
                 case 1:
                     return objects[0];
                 default:
-                    return new HoconMergedObject(this, objects);
+                    return new MutableHoconMergedObject(this, objects);
             }
         }
 
-        public virtual bool TryGetObject(out HoconObject result)
+        public virtual bool TryGetObject(out MutableHoconObject result)
         {
             result = null;
             if (Type != HoconType.Object)
@@ -84,7 +84,7 @@ namespace Hocon
                     result = objects[0];
                     break;
                 default:
-                    result = new HoconMergedObject(this, objects);
+                    result = new MutableHoconMergedObject(this, objects);
                     break;
             }
             return true;
@@ -116,15 +116,15 @@ namespace Hocon
             => !Type.IsLiteral() ? null : ConcatRawString();
 
         /// <summary>
-        ///     Retrieves a list of values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of values represented by this <see cref="HoconValue" />.</returns>
-        public virtual IList<HoconValue> GetArray()
+        /// <returns>A list of values represented by this <see cref="MutableHoconValue" />.</returns>
+        public virtual IList<MutableHoconValue> GetArray()
         {
             switch (Type)
             {
                 case HoconType.Array:
-                    var result = new List<HoconValue>();
+                    var result = new List<MutableHoconValue>();
                     foreach (var element in this)
                         if (element.Type == HoconType.Array)
                             result.AddRange(element.GetArray());
@@ -147,9 +147,9 @@ namespace Hocon
             }
         }
 
-        public virtual bool TryGetArray(out List<HoconValue> result)
+        public virtual bool TryGetArray(out List<MutableHoconValue> result)
         {
-            result = new List<HoconValue>();
+            result = new List<MutableHoconValue>();
             switch (Type)
             {
                 case HoconType.Array:
@@ -190,9 +190,9 @@ namespace Hocon
             }
         }
 
-        public virtual IHoconElement Clone(IHoconElement newParent)
+        public virtual IMutableHoconElement Clone(IMutableHoconElement newParent)
         {
-            var clone = new HoconValue(newParent);
+            var clone = new MutableHoconValue(newParent);
             foreach (var element in this) clone.Add(element.Clone(clone));
             return clone;
         }
@@ -204,34 +204,34 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Wraps this <see cref="HoconValue" /> into a new <see cref="HoconObject" /> at the specified key.
+        ///     Wraps this <see cref="MutableHoconValue" /> into a new <see cref="MutableHoconObject" /> at the specified key.
         /// </summary>
         /// <param name="key">The key designated to be the new root element.</param>
         /// <returns>A new HOCON root.</returns>
         /// <remarks>
-        ///     Immutable. Performs a deep copy on this <see cref="HoconValue" /> first.
+        ///     Immutable. Performs a deep copy on this <see cref="MutableHoconValue" /> first.
         /// </remarks>
-        public HoconRoot AtKey(string key)
+        public MutableRoot AtKey(string key)
         {
-            var value = new HoconValue(null);
-            var obj = new HoconObject(value);
-            var field = new HoconField(key, obj);
-            field.SetValue(Clone(field) as HoconValue);
+            var value = new MutableHoconValue(null);
+            var obj = new MutableHoconObject(value);
+            var field = new MutableHoconField(key, obj);
+            field.SetValue(Clone(field) as MutableHoconValue);
             obj.Add(key, field);
             value.Add(obj);
             
-            return new HoconRoot(value);
+            return new MutableRoot(value);
         }
 
         /// <summary>
-        ///     Merge an <see cref="IHoconElement" /> into this <see cref="HoconValue" />.
+        ///     Merge an <see cref="IMutableHoconElement" /> into this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <param name="value">The <see cref="IHoconElement" /> value to be merged into this <see cref="HoconValue" /></param>
+        /// <param name="value">The <see cref="IMutableHoconElement" /> value to be merged into this <see cref="MutableHoconValue" /></param>
         /// <exception cref="HoconParserException">
-        ///     Throws when the merged <see cref="IHoconElement.Type" /> type did not match <see cref="HoconValue.Type" />,
-        ///     if <see cref="HoconValue.Type" /> is not <see cref="HoconType.Empty" />.
+        ///     Throws when the merged <see cref="IMutableHoconElement.Type" /> type did not match <see cref="MutableHoconValue.Type" />,
+        ///     if <see cref="MutableHoconValue.Type" /> is not <see cref="HoconType.Empty" />.
         /// </exception>
-        public new virtual void Add(IHoconElement value)
+        public new virtual void Add(IMutableHoconElement value)
         {
             if (Type == HoconType.Empty)
             {
@@ -247,7 +247,7 @@ namespace Hocon
             base.Add(value);
         }
 
-        public new virtual void AddRange(IEnumerable<IHoconElement> values)
+        public new virtual void AddRange(IEnumerable<IMutableHoconElement> values)
         {
             foreach (var value in values) Add(value);
         }
@@ -276,16 +276,16 @@ namespace Hocon
             return sb.ToString();
         }
 
-        internal List<HoconSubstitution> GetSubstitutions()
+        internal List<MutableHoconSubstitution> GetSubstitutions()
         {
             var x = from v in this
-                where v is HoconSubstitution
+                where v is MutableHoconSubstitution
                 select v;
 
-            return x.Cast<HoconSubstitution>().ToList();
+            return x.Cast<MutableHoconSubstitution>().ToList();
         }
 
-        internal void ResolveValue(HoconSubstitution child)
+        internal void ResolveValue(MutableHoconSubstitution child)
         {
             var index = IndexOf(child);
             Remove(child);
@@ -299,21 +299,21 @@ namespace Hocon
                         "Invalid substitution, substituted type be must be mergeable with its sibling type. " +
                         $"Sibling type:{Type}, substitution type:{child.Type}");
 
-                var clonedValue = (HoconValue)child.ResolvedValue.Clone(Parent);
+                var clonedValue = (MutableHoconValue)child.ResolvedValue.Clone(Parent);
                 switch (Type)
                 {
                     case HoconType.Object:
                         Insert(index, clonedValue.GetObject());
                         break;
                     case HoconType.Array:
-                        var hoconArray = new HoconArray(this);
+                        var hoconArray = new MutableHoconArray(this);
                         hoconArray.AddRange(clonedValue.GetArray());
                         Insert(index, hoconArray);
                         break;
                     case HoconType.Boolean:
                     case HoconType.Number:
                     case HoconType.String:
-                        var elementList = new List<IHoconElement>();
+                        var elementList = new List<IMutableHoconElement>();
                         foreach(var element in clonedValue)
                             elementList.Add(element);
                         InsertRange(index, elementList);
@@ -323,10 +323,10 @@ namespace Hocon
 
             switch (Parent)
             {
-                case HoconField v:
+                case MutableHoconField v:
                     v.ResolveValue(this);
                     break;
-                case HoconArray a:
+                case MutableHoconArray a:
                     a.ResolveValue(child);
                     break;
                 default:
@@ -334,15 +334,15 @@ namespace Hocon
             }
         }
 
-        internal void ReParent(HoconValue value)
+        internal void ReParent(MutableHoconValue value)
         {
             foreach (var element in value) Add(element.Clone(this));
         }
 
         /// <summary>
-        ///     Returns a HOCON string representation of this <see cref="HoconValue" />.
+        ///     Returns a HOCON string representation of this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A HOCON string representation of this <see cref="HoconValue" />.</returns>
+        /// <returns>A HOCON string representation of this <see cref="MutableHoconValue" />.</returns>
         public override string ToString()
         {
             return ToString(1, 2);
@@ -351,7 +351,7 @@ namespace Hocon
         // HoconValue is an aggregate of same typed objects, so there are possibilities 
         // where it can match with any other same typed objects (ie. a HoconLiteral can 
         // have the same value as a HoconValue).
-        public virtual bool Equals(IHoconElement other)
+        public virtual bool Equals(IMutableHoconElement other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -376,7 +376,7 @@ namespace Hocon
 
         public override bool Equals(object obj)
         {
-            return obj is IHoconElement value && Equals(value);
+            return obj is IMutableHoconElement value && Equals(value);
         }
 
         public override int GetHashCode()
@@ -390,12 +390,12 @@ namespace Hocon
             }
         }
 
-        public static bool operator ==(HoconValue left, HoconValue right)
+        public static bool operator ==(MutableHoconValue left, MutableHoconValue right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(HoconValue left, HoconValue right)
+        public static bool operator !=(MutableHoconValue left, MutableHoconValue right)
         {
             return !Equals(left, right);
         }
@@ -403,11 +403,11 @@ namespace Hocon
         #region Value Getter methods
 
         /// <summary>
-        ///     Retrieves the boolean value from this <see cref="HoconValue" />.
+        ///     Retrieves the boolean value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The boolean value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The boolean value represented by this <see cref="MutableHoconValue" />.</returns>
         /// <exception cref="System.NotSupportedException">
-        ///     This exception occurs when the <see cref="HoconValue" /> doesn't
+        ///     This exception occurs when the <see cref="MutableHoconValue" /> doesn't
         ///     conform to the standard boolean values: "on", "off", "true", or "false"
         /// </exception>
         public bool GetBoolean()
@@ -447,9 +447,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the decimal value from this <see cref="HoconValue" />.
+        ///     Retrieves the decimal value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The decimal value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The decimal value represented by this <see cref="MutableHoconValue" />.</returns>
         public decimal GetDecimal()
         {
             var value = GetString();
@@ -492,9 +492,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the float value from this <see cref="HoconValue" />.
+        ///     Retrieves the float value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The float value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The float value represented by this <see cref="MutableHoconValue" />.</returns>
         public float GetFloat()
         {
             var value = GetString();
@@ -542,9 +542,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the double value from this <see cref="HoconValue" />.
+        ///     Retrieves the double value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The double value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The double value represented by this <see cref="MutableHoconValue" />.</returns>
         public double GetDouble()
         {
             var value = GetString();
@@ -593,9 +593,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the long value from this <see cref="HoconValue" />.
+        ///     Retrieves the long value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The long value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The long value represented by this <see cref="MutableHoconValue" />.</returns>
         public long GetLong()
         {
             var value = GetString();
@@ -661,9 +661,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the integer value from this <see cref="HoconValue" />.
+        ///     Retrieves the integer value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The integer value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The integer value represented by this <see cref="MutableHoconValue" />.</returns>
         public int GetInt()
         {
             var value = GetString();
@@ -732,9 +732,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the byte value from this <see cref="HoconValue" />.
+        ///     Retrieves the byte value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The byte value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The byte value represented by this <see cref="MutableHoconValue" />.</returns>
         public byte GetByte()
         {
             var value = GetString();
@@ -800,9 +800,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of byte values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of byte values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of byte values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of byte values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<byte> GetByteList()
         {
             return GetArray().Select(v => v.GetByte()).ToList();
@@ -827,9 +827,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of integer values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of integer values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of integer values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of integer values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<int> GetIntList()
         {
             return GetArray().Select(v => v.GetInt()).ToList();
@@ -854,9 +854,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of long values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of long values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of long values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of long values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<long> GetLongList()
         {
             return GetArray().Select(v => v.GetLong()).ToList();
@@ -881,9 +881,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of boolean values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of boolean values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of boolean values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of boolean values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<bool> GetBooleanList()
         {
             return GetArray().Select(v => v.GetBoolean()).ToList();
@@ -908,9 +908,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of float values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of float values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of float values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of float values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<float> GetFloatList()
         {
             return GetArray().Select(v => v.GetFloat()).ToList();
@@ -935,9 +935,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of double values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of double values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of double values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of double values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<double> GetDoubleList()
         {
             return GetArray().Select(v => v.GetDouble()).ToList();
@@ -962,9 +962,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of decimal values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of decimal values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of decimal values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of decimal values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<decimal> GetDecimalList()
         {
             return GetArray().Select(v => v.GetDecimal()).ToList();
@@ -989,9 +989,9 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of string values from this <see cref="HoconValue" />.
+        ///     Retrieves a list of string values from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of string values represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>A list of string values represented by this <see cref="MutableHoconValue" />.</returns>
         public IList<string> GetStringList()
         {
             return GetArray().Select(v => v.GetString()).ToList();
@@ -1016,20 +1016,20 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a list of objects from this <see cref="HoconValue" />.
+        ///     Retrieves a list of objects from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>A list of objects represented by this <see cref="HoconValue" />.</returns>
-        public IList<HoconObject> GetObjectList()
+        /// <returns>A list of objects represented by this <see cref="MutableHoconValue" />.</returns>
+        public IList<MutableHoconObject> GetObjectList()
         {
             return GetArray().Select(v => v.GetObject()).ToList();
         }
 
-        public bool TryGetObjectList(out IList<HoconObject> result)
+        public bool TryGetObjectList(out IList<MutableHoconObject> result)
         {
-            result = default(List<HoconObject>);
+            result = default(List<MutableHoconObject>);
             if (TryGetArray(out var arr))
             {
-                var list = new List<HoconObject>();
+                var list = new List<MutableHoconObject>();
                 foreach (var val in arr)
                 {
                     if (!val.TryGetObject(out var res))
@@ -1049,10 +1049,10 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the time span value from this <see cref="HoconValue" />.
+        ///     Retrieves the time span value from this <see cref="MutableHoconValue" />.
         /// </summary>
         /// <param name="allowInfinite">A flag used to set inifinite durations.</param>
-        /// <returns>The time span value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The time span value represented by this <see cref="MutableHoconValue" />.</returns>
         public TimeSpan GetTimeSpan(bool allowInfinite = true)
         {
             string res = GetString();
@@ -1214,9 +1214,9 @@ namespace Hocon
         private static char[] Digits { get; } = "0123456789".ToCharArray();
 
         /// <summary>
-        ///     Retrieves the long value, optionally suffixed with a 'b', from this <see cref="HoconValue" />.
+        ///     Retrieves the long value, optionally suffixed with a 'b', from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The long value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The long value represented by this <see cref="MutableHoconValue" />.</returns>
         public long? GetByteSize()
         {
             var res = GetString();

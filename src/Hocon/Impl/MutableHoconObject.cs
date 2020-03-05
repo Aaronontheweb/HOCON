@@ -29,36 +29,36 @@ namespace Hocon
     /// }
     /// </code>
     /// </summary>
-    public class HoconObject : Dictionary<string, HoconField>, IHoconElement
+    internal class MutableHoconObject : Dictionary<string, MutableHoconField>, IMutableHoconElement
     {
-        private static readonly HoconObject _empty;
-        public static HoconObject Empty => _empty;
+        private static readonly MutableHoconObject _empty;
+        public static MutableHoconObject Empty => _empty;
 
-        static HoconObject()
+        static MutableHoconObject()
         {
-            var value = new HoconValue(null);
-            _empty = new HoconObject(value);
+            var value = new MutableHoconValue(null);
+            _empty = new MutableHoconObject(value);
         }
 
         [Obsolete("Only used for serialization", true)]
-        private HoconObject()
+        private MutableHoconObject()
         { }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="HoconObject" /> class.
+        ///     Initializes a new instance of the <see cref="MutableHoconObject" /> class.
         /// </summary>
-        public HoconObject(IHoconElement parent)
+        public MutableHoconObject(IMutableHoconElement parent)
         {
-            if (!(parent is HoconValue))
+            if (!(parent is MutableHoconValue))
                 throw new HoconException("HoconObject parent can only be a HoconValue.");
 
             Parent = parent;
         }
 
-        public new HoconField this[string key]
+        public new MutableHoconField this[string key]
             => GetField(key);
 
-        public HoconField this[HoconPath path]
+        public MutableHoconField this[HoconPath path]
             => GetField(path);
 
         public HoconPath Path
@@ -68,7 +68,7 @@ namespace Hocon
                 var parent = Parent;
                 while (parent != null)
                 {
-                    if (parent is HoconField field) return field.Path;
+                    if (parent is MutableHoconField field) return field.Path;
 
                     parent = parent.Parent;
                 }
@@ -87,7 +87,7 @@ namespace Hocon
             => this.ToDictionary(k => k.Key, v
                 => v.Value.Type == HoconType.Object ? (object) v.Value.GetObject().Unwrapped : v.Value);
 
-        public IHoconElement Parent { get; }
+        public IMutableHoconElement Parent { get; }
 
         /// <inheritdoc />
         /// <returns><see cref="HoconType.Object" />.</returns>
@@ -97,7 +97,7 @@ namespace Hocon
         /// <summary>
         ///     Retrieves a list of elements associated with this element.
         /// </summary>
-        public HoconObject GetObject()
+        public MutableHoconObject GetObject()
         {
             return this;
         }
@@ -119,9 +119,9 @@ namespace Hocon
         ///     Converts a numerically indexed object into an array where its elements are sorted
         ///     based on the numerically sorted order of the key.
         /// </summary>
-        public IList<HoconValue> GetArray()
+        public IList<MutableHoconValue> GetArray()
         {
-            var sortedDict = new SortedDictionary<int, HoconValue>();
+            var sortedDict = new SortedDictionary<int, MutableHoconValue>();
             var type = HoconType.Empty;
             foreach (var field in Values)
             {
@@ -143,11 +143,11 @@ namespace Hocon
             return sortedDict.Values.ToList();
         }
 
-        public bool TryGetArray(out List<HoconValue> result)
+        public bool TryGetArray(out List<MutableHoconValue> result)
         {
-            result = new List<HoconValue>();
+            result = new List<MutableHoconValue>();
 
-            var sortedDict = new SortedDictionary<int, HoconValue>();
+            var sortedDict = new SortedDictionary<int, MutableHoconValue>();
             var type = HoconType.Empty;
             foreach (var field in Values)
             {
@@ -179,23 +179,23 @@ namespace Hocon
         }
 
         /// <inheritdoc />
-        public IHoconElement Clone(IHoconElement newParent)
+        public IMutableHoconElement Clone(IMutableHoconElement newParent)
         {
-            var clone = new HoconObject(newParent);
-            foreach (var kvp in this) clone.SetField(kvp.Key, kvp.Value.Clone(clone) as HoconField);
+            var clone = new MutableHoconObject(newParent);
+            foreach (var kvp in this) clone.SetField(kvp.Key, kvp.Value.Clone(clone) as MutableHoconField);
             return clone;
         }
 
         /// <summary>
-        ///     Retrieves the <see cref="HoconField" /> field associated with the supplied <see cref="string" /> key.
+        ///     Retrieves the <see cref="MutableHoconField" /> field associated with the supplied <see cref="string" /> key.
         /// </summary>
         /// <param name="key">The <see cref="string" /> key associated with the field to retrieve.</param>
         /// <returns>
-        ///     The <see cref="HoconField" /> associated with the supplied key.
+        ///     The <see cref="MutableHoconField" /> associated with the supplied key.
         /// </returns>
         /// <exception cref="ArgumentNullException">key is null</exception>
-        /// <exception cref="KeyNotFoundException">The key does not exist in the <see cref="HoconObject" /></exception>
-        public HoconField GetField(string key)
+        /// <exception cref="KeyNotFoundException">The key does not exist in the <see cref="MutableHoconObject" /></exception>
+        public MutableHoconField GetField(string key)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
@@ -205,18 +205,18 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the <see cref="HoconField" /> field associated with the supplied <see cref="string" /> key.
+        ///     Retrieves the <see cref="MutableHoconField" /> field associated with the supplied <see cref="string" /> key.
         /// </summary>
         /// <param name="key">The <see cref="string" /> key associated with the field to retrieve.</param>
         /// <param name="result">
-        ///     When this method returns, contains the <see cref="HoconField" />
+        ///     When this method returns, contains the <see cref="MutableHoconField" />
         ///     associated with the specified key, if the key is found;
         ///     otherwise, null. This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the <see cref="HoconObject" /> contains a field with the the specified key; otherwise, <c>false</c>.
+        ///     <c>true</c> if the <see cref="MutableHoconObject" /> contains a field with the the specified key; otherwise, <c>false</c>.
         /// </returns>
-        public bool TryGetField(string key, out HoconField result)
+        public bool TryGetField(string key, out MutableHoconField result)
         {
             result = null;
             if (string.IsNullOrWhiteSpace(key))
@@ -226,7 +226,7 @@ namespace Hocon
             return TryGetField(path, out result);
         }
 
-        public HoconField GetField(HoconPath path)
+        public MutableHoconField GetField(HoconPath path)
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
@@ -257,12 +257,12 @@ namespace Hocon
             }
         }
 
-        internal virtual void SetField(string key, HoconField value)
+        internal virtual void SetField(string key, MutableHoconField value)
         {
             base[key] = value;
         }
 
-        public bool TryGetField(HoconPath path, out HoconField result)
+        public bool TryGetField(HoconPath path, out MutableHoconField result)
         {
             result = null;
             if (path == null || path.Count == 0)
@@ -292,38 +292,38 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the merged <see cref="HoconObject" /> backing the <see cref="HoconField" /> field
+        ///     Retrieves the merged <see cref="MutableHoconObject" /> backing the <see cref="MutableHoconField" /> field
         ///     associated with the supplied <see cref="string" /> key.
         /// </summary>
         /// <param name="key">The <see cref="string" /> key associated with the field to retrieve.</param>
         /// <returns>
-        ///     The <see cref="HoconObject" /> backing the <see cref="HoconField" /> field associated with the supplied key.
+        ///     The <see cref="MutableHoconObject" /> backing the <see cref="MutableHoconField" /> field associated with the supplied key.
         /// </returns>
         /// <exception cref="ArgumentNullException">key is null</exception>
-        /// <exception cref="KeyNotFoundException">The key does not exist in the <see cref="HoconObject" /></exception>
+        /// <exception cref="KeyNotFoundException">The key does not exist in the <see cref="MutableHoconObject" /></exception>
         /// <exception cref="HoconException">
-        ///     The <see cref="HoconField.Type" /> is not of type <see cref="HoconType.Object" />
+        ///     The <see cref="MutableHoconField.Type" /> is not of type <see cref="HoconType.Object" />
         /// </exception>
-        public HoconObject GetObject(string key)
+        public MutableHoconObject GetObject(string key)
         {
             return GetField(key).GetObject();
         }
 
         /// <summary>
-        ///     Retrieves the merged <see cref="HoconObject" /> backing the <see cref="HoconField" /> field
+        ///     Retrieves the merged <see cref="MutableHoconObject" /> backing the <see cref="MutableHoconField" /> field
         ///     associated with the supplied <see cref="string" /> key.
         /// </summary>
         /// <param name="key">The <see cref="string" /> key associated with the field to retrieve.</param>
         /// <param name="result">
-        ///     When this method returns, contains the backing <see cref="HoconObject" />
-        ///     of the <see cref="HoconField" /> associated with the specified key, if the key is found;
+        ///     When this method returns, contains the backing <see cref="MutableHoconObject" />
+        ///     of the <see cref="MutableHoconField" /> associated with the specified key, if the key is found;
         ///     otherwise, null. This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the <see cref="HoconObject" /> contains a <see cref="HoconField" /> field with the the specified key
-        ///     and the <see cref="HoconField.Type" /> is of type <see cref="HoconType.Object" />; otherwise, <c>false</c>.
+        ///     <c>true</c> if the <see cref="MutableHoconObject" /> contains a <see cref="MutableHoconField" /> field with the the specified key
+        ///     and the <see cref="MutableHoconField.Type" /> is of type <see cref="HoconType.Object" />; otherwise, <c>false</c>.
         /// </returns>
-        public bool TryGetObject(string key, out HoconObject result)
+        public bool TryGetObject(string key, out MutableHoconObject result)
         {
             result = null;
             if (!TryGetField(key, out var field))
@@ -334,43 +334,43 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves the backing <see cref="HoconValue" /> value of the <see cref="HoconField" /> associated with
+        ///     Retrieves the backing <see cref="MutableHoconValue" /> value of the <see cref="MutableHoconField" /> associated with
         ///     the supplied <see cref="HoconPath" /> path, relative to this object.
         /// </summary>
         /// <param name="path">
         ///     The relative <see cref="HoconPath" /> path associated with
-        ///     the <see cref="HoconField" /> of the <see cref="HoconValue" /> value to retrieve.
+        ///     the <see cref="MutableHoconField" /> of the <see cref="MutableHoconValue" /> value to retrieve.
         /// </param>
         /// <returns>
-        ///     The <see cref="HoconValue" /> value backing the <see cref="HoconField" /> field associated
+        ///     The <see cref="MutableHoconValue" /> value backing the <see cref="MutableHoconField" /> field associated
         ///     with the supplied key.
         /// </returns>
         /// <exception cref="ArgumentNullException">path is null</exception>
         /// <exception cref="ArgumentException">path is empty</exception>
-        /// <exception cref="KeyNotFoundException">The key does not exist in the <see cref="HoconObject" /></exception>
-        public HoconValue GetValue(HoconPath path)
+        /// <exception cref="KeyNotFoundException">The key does not exist in the <see cref="MutableHoconObject" /></exception>
+        public MutableHoconValue GetValue(HoconPath path)
         {
             return GetField(path).Value;
         }
 
         /// <summary>
-        ///     Retrieves the backing <see cref="HoconValue" /> value of the <see cref="HoconField" /> associated with
+        ///     Retrieves the backing <see cref="MutableHoconValue" /> value of the <see cref="MutableHoconField" /> associated with
         ///     the supplied <see cref="HoconPath" /> path, relative to this object.
         /// </summary>
         /// <param name="path">
         ///     The relative <see cref="HoconPath" /> path associated with
-        ///     the <see cref="HoconField" /> of the <see cref="HoconValue" /> value to retrieve.
+        ///     the <see cref="MutableHoconField" /> of the <see cref="MutableHoconValue" /> value to retrieve.
         /// </param>
         /// <param name="result">
-        ///     When this method returns, contains the backing <see cref="HoconValue" />
-        ///     of the <see cref="HoconField" /> associated with the specified <see cref="HoconPath" /> path,
+        ///     When this method returns, contains the backing <see cref="MutableHoconValue" />
+        ///     of the <see cref="MutableHoconField" /> associated with the specified <see cref="HoconPath" /> path,
         ///     if the path is resolveable; otherwise, null. This parameter is passed uninitialized.
         /// </param>
         /// <returns>
-        ///     <c>true</c> if the <see cref="HoconObject" /> children contains a <see cref="HoconField" /> field resolveable
+        ///     <c>true</c> if the <see cref="MutableHoconObject" /> children contains a <see cref="MutableHoconField" /> field resolveable
         ///     with the the specified relative <see cref="HoconPath" /> path; otherwise, <c>false</c>.
         /// </returns>
-        public bool TryGetValue(HoconPath path, out HoconValue result)
+        public bool TryGetValue(HoconPath path, out MutableHoconValue result)
         {
             result = null;
             if (!TryGetField(path, out var field))
@@ -386,17 +386,17 @@ namespace Hocon
         /// </summary>
         /// <param name="key">The path associated with the value to retrieve.</param>
         /// <returns>The value associated with the supplied key.</returns>
-        internal virtual HoconField GetOrCreateKey(string key)
+        internal virtual MutableHoconField GetOrCreateKey(string key)
         {
             if (TryGetValue(key, out var child))
                 return child;
 
-            child = new HoconField(key, this);
+            child = new MutableHoconField(key, this);
             Add(key, child);
             return child;
         }
 
-        internal virtual HoconField TraversePath(HoconPath relativePath)
+        internal virtual MutableHoconField TraversePath(HoconPath relativePath)
         {
             var currentObject = this;
             var index = 0;
@@ -420,7 +420,7 @@ namespace Hocon
             return ToString(0, 2);
         }
 
-        public virtual void Merge(HoconObject other)
+        public virtual void Merge(MutableHoconObject other)
         {
             var keys = other.Keys.ToArray();
             foreach (var key in keys)
@@ -441,7 +441,7 @@ namespace Hocon
             }
         }
 
-        public void FallbackMerge(HoconObject other)
+        public void FallbackMerge(MutableHoconObject other)
         {
             foreach(var kvp in other)
             {
@@ -449,14 +449,14 @@ namespace Hocon
                 if (!TryGetValue(path, out _))
                 {
                     var currentObject = this;
-                    HoconField newField = null;
+                    MutableHoconField newField = null;
                     foreach (var key in path)
                     {
                         newField = currentObject.GetOrCreateKey(key);
                         if (newField.Type == HoconType.Empty)
                         {
-                            var emptyValue = new HoconValue(newField);
-                            emptyValue.Add(new HoconObject(emptyValue));
+                            var emptyValue = new MutableHoconValue(newField);
+                            emptyValue.Add(new MutableHoconObject(emptyValue));
                             newField.SetValue(emptyValue);
                         }
                         currentObject = newField.GetObject();
@@ -470,7 +470,7 @@ namespace Hocon
             }
         }
 
-        internal void ResolveValue(HoconField child)
+        internal void ResolveValue(MutableHoconField child)
         {
             if (child.Type == HoconType.Empty)
             {
@@ -481,7 +481,7 @@ namespace Hocon
             }
         }
 
-        public bool Equals(IHoconElement other)
+        public bool Equals(IMutableHoconElement other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -491,7 +491,7 @@ namespace Hocon
 
         public override bool Equals(object obj)
         {
-            return obj is IHoconElement element && Equals(element);
+            return obj is IMutableHoconElement element && Equals(element);
         }
 
         public override int GetHashCode()
@@ -506,12 +506,12 @@ namespace Hocon
             return result;
         }
 
-        public static bool operator ==(HoconObject left, HoconObject right)
+        public static bool operator ==(MutableHoconObject left, MutableHoconObject right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(HoconObject left, HoconObject right)
+        public static bool operator !=(MutableHoconObject left, MutableHoconObject right)
         {
             return !Equals(left, right);
         }

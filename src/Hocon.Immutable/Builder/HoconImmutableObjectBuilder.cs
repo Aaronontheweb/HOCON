@@ -17,7 +17,7 @@ namespace Hocon.Immutable.Builder
             return this;
         }
 
-        public HoconImmutableObjectBuilder Merge(HoconObject @object)
+        public HoconImmutableObjectBuilder Merge(MutableHoconObject @object)
         {
             foreach (var kvp in @object) this[kvp.Key] = kvp.Value.ToHoconImmutable();
             return this;

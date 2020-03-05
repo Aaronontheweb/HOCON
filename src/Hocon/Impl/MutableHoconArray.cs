@@ -21,19 +21,19 @@ namespace Hocon
     /// }
     /// </code>
     /// </summary>
-    public sealed class HoconArray : List<HoconValue>, IHoconElement
+    internal sealed class MutableHoconArray : List<MutableHoconValue>, IMutableHoconElement
     {
         private HoconType _arrayType = HoconType.Empty;
 
-        public HoconArray(IHoconElement parent)
+        public MutableHoconArray(IMutableHoconElement parent)
         {
             Parent = parent;
         }
 
-        public IHoconElement Parent { get; }
+        public IMutableHoconElement Parent { get; }
         public HoconType Type => HoconType.Array;
 
-        public HoconObject GetObject()
+        public MutableHoconObject GetObject()
         {
             throw new HoconException("Can not convert Hocon array into an object.");
         }
@@ -52,7 +52,7 @@ namespace Hocon
             => throw new HoconException("Can not convert Hocon array into a string.");
 
         /// <inheritdoc />
-        public IList<HoconValue> GetArray()
+        public IList<MutableHoconValue> GetArray()
         {
             return this;
         }
@@ -62,23 +62,23 @@ namespace Hocon
             return $"[{string.Join(", ", this)}]";
         }
 
-        public IHoconElement Clone(IHoconElement newParent)
+        public IMutableHoconElement Clone(IMutableHoconElement newParent)
         {
-            var newArray = new HoconArray(newParent);
-            foreach (var value in this) newArray.Add(value.Clone(newArray) as HoconValue);
+            var newArray = new MutableHoconArray(newParent);
+            foreach (var value in this) newArray.Add(value.Clone(newArray) as MutableHoconValue);
             return newArray;
         }
 
-        public bool Equals(IHoconElement other)
+        public bool Equals(IMutableHoconElement other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
             if (other.Type != HoconType.Array) return false;
-            if (other is HoconArray array) return Equals(array);
+            if (other is MutableHoconArray array) return Equals(array);
             return this.SequenceEqual(other.GetArray());
         }
 
-        public new void Add(HoconValue value)
+        public new void Add(MutableHoconValue value)
         {
             if (value.Type != HoconType.Empty)
             {
@@ -92,9 +92,9 @@ namespace Hocon
             base.Add(value);
         }
 
-        internal void ResolveValue(HoconSubstitution sub)
+        internal void ResolveValue(MutableHoconSubstitution sub)
         {
-            var subValue = (HoconValue) sub.Parent;
+            var subValue = (MutableHoconValue) sub.Parent;
             if (sub.Type == HoconType.Empty)
             {
                 subValue.Remove(sub);
@@ -117,7 +117,7 @@ namespace Hocon
             return ToString(0, 2);
         }
 
-        private bool Equals(HoconArray other)
+        private bool Equals(MutableHoconArray other)
         {
             if (Count != other.Count) return false;
             for (var i = 0; i < Count; ++i)
@@ -130,7 +130,7 @@ namespace Hocon
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is IHoconElement element && Equals(element);
+            return obj is IMutableHoconElement element && Equals(element);
         }
 
         public override int GetHashCode()
@@ -144,12 +144,12 @@ namespace Hocon
             }
         }
 
-        public static bool operator ==(HoconArray left, HoconArray right)
+        public static bool operator ==(MutableHoconArray left, MutableHoconArray right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(HoconArray left, HoconArray right)
+        public static bool operator !=(MutableHoconArray left, MutableHoconArray right)
         {
             return !Equals(left, right);
         }

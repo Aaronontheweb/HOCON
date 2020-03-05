@@ -17,26 +17,26 @@ namespace Hocon.Immutable.Extensions
                 .Build();
         }
 
-        public static HoconImmutableElement ToHoconImmutable(this IHoconElement element)
+        public static HoconImmutableElement ToHoconImmutable(this IMutableHoconElement element)
         {
             switch (element)
             {
-                case HoconObject o:
+                case MutableHoconObject o:
                     return o.ToHoconImmutable();
-                case HoconArray a:
+                case MutableHoconArray a:
                     return a.ToHoconImmutable();
-                case HoconLiteral l:
+                case MutableHoconLiteral l:
                     return l.ToHoconImmutable();
-                case HoconValue v:
+                case MutableHoconValue v:
                     return v.ToHoconImmutable();
-                case HoconField f:
+                case MutableHoconField f:
                     return f.ToHoconImmutable();
                 default:
                     throw new HoconException($"Unknown Hocon element type:{element.GetType().Name}");
             }
         }
 
-        public static HoconImmutableElement ToHoconImmutable(this HoconValue value)
+        public static HoconImmutableElement ToHoconImmutable(this MutableHoconValue value)
         {
             switch (value.Type)
             {
@@ -62,26 +62,26 @@ namespace Hocon.Immutable.Extensions
             }
         }
 
-        public static HoconImmutableObject ToHoconImmutable(this HoconObject @object)
+        public static HoconImmutableObject ToHoconImmutable(this MutableHoconObject @object)
         {
             return new HoconImmutableObjectBuilder()
                 .Merge(@object)
                 .Build();
         }
 
-        public static HoconImmutableElement ToHoconImmutable(this HoconField field)
+        public static HoconImmutableElement ToHoconImmutable(this MutableHoconField field)
         {
             return field.Value.ToHoconImmutable();
         }
 
-        public static HoconImmutableArray ToHoconImmutable(this HoconArray array)
+        public static HoconImmutableArray ToHoconImmutable(this MutableHoconArray array)
         {
             return new HoconImmutableArrayBuilder()
                 .AddRange(array)
                 .Build();
         }
 
-        public static HoconImmutableLiteral ToHoconImmutable(this HoconLiteral literal)
+        public static HoconImmutableLiteral ToHoconImmutable(this MutableHoconLiteral literal)
         {
             return literal.LiteralType == HoconLiteralType.Null
                 ? null

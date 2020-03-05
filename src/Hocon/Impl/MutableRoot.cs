@@ -14,37 +14,37 @@ namespace Hocon
     ///     This class represents the root element in a HOCON (Human-Optimized Config Object Notation)
     ///     configuration string.
     /// </summary>
-    public class HoconRoot:IEquatable<HoconRoot>
+    internal class MutableRoot : IEquatable<MutableRoot>
     {
         /// <inheritdoc />
         /// <summary>
         ///     Initializes a new instance of the <see cref="T:Hocon.HoconRoot" /> class.
         /// </summary>
-        protected HoconRoot()
+        protected MutableRoot()
         {
-            Substitutions = Enumerable.Empty<HoconSubstitution>();
+            Substitutions = Enumerable.Empty<MutableHoconSubstitution>();
         }
 
-        /// <inheritdoc cref="HoconRoot()" />
+        /// <inheritdoc cref="MutableRoot()" />
         /// <param name="value">The value to associate with this element.</param>
-        public HoconRoot(HoconValue value) : this(value, Enumerable.Empty<HoconSubstitution>())
+        public MutableRoot(MutableHoconValue value) : this(value, Enumerable.Empty<MutableHoconSubstitution>())
         {
         }
 
-        /// <inheritdoc cref="HoconRoot()" />
+        /// <inheritdoc cref="MutableRoot()" />
         /// <param name="value">The value to associate with this element.</param>
         /// <param name="substitutions">An enumeration of substitutions to associate with this element.</param>
-        public HoconRoot(HoconValue value, IEnumerable<HoconSubstitution> substitutions)
+        public MutableRoot(MutableHoconValue value, IEnumerable<MutableHoconSubstitution> substitutions)
         {
             _internalValue = value;
             Substitutions = substitutions;
         }
 
-        protected HoconValue _internalValue;
+        protected MutableHoconValue _internalValue;
         /// <summary>
         ///     Retrieves the value associated with this element.
         /// </summary>
-        public virtual HoconValue Value {
+        public virtual MutableHoconValue Value {
             get => _internalValue;
             protected set => _internalValue = value;
         }
@@ -52,9 +52,9 @@ namespace Hocon
         /// <summary>
         ///     Retrieves an enumeration of substitutions associated with this element.
         /// </summary>
-        public IEnumerable<HoconSubstitution> Substitutions { get; private set; }
+        public IEnumerable<MutableHoconSubstitution> Substitutions { get; private set; }
 
-        protected virtual bool TryGetNode(string path, out HoconValue result)
+        protected virtual bool TryGetNode(string path, out MutableHoconValue result)
         {
             result = null;
             if (!HoconPath.TryParse(path, out var hoconPath))
@@ -62,7 +62,7 @@ namespace Hocon
             return TryGetNode(hoconPath, out result);
         }
 
-        protected virtual bool TryGetNode(HoconPath path, out HoconValue result)
+        protected virtual bool TryGetNode(HoconPath path, out MutableHoconValue result)
         {
             result = null;
             if (Value.Type != HoconType.Object)
@@ -75,12 +75,12 @@ namespace Hocon
             return obj.TryGetValue(path, out result);
         }
 
-        protected virtual HoconValue GetNode(string path)
+        protected virtual MutableHoconValue GetNode(string path)
         {
             return GetNode(HoconPath.Parse(path));
         }
 
-        protected virtual HoconValue GetNode(HoconPath path)
+        protected virtual MutableHoconValue GetNode(HoconPath path)
         {
             if (Value.Type != HoconType.Object)
                 throw new HoconException("Hocon is not an object.");
@@ -114,26 +114,26 @@ namespace Hocon
         ///     NOTE: You might not be able to reproduce a clean reproduction of the original configuration file after this
         ///     normalization.
         /// </summary>
-        public HoconRoot Normalize()
+        public MutableRoot Normalize()
         {
             Flatten(Value);
-            Substitutions = Enumerable.Empty<HoconSubstitution>();
+            Substitutions = Enumerable.Empty<MutableHoconSubstitution>();
             return this;
         }
 
-        private static void Flatten(IHoconElement node)
+        private static void Flatten(IMutableHoconElement node)
         {
 
-            if (!(node is HoconValue v))
+            if (!(node is MutableHoconValue v))
                 return;
 
             switch (v.Type)
             {
                 case HoconType.Object:
                     var o = v.GetObject();
-                    if(o is HoconMergedObject mo)
+                    if(o is MutableHoconMergedObject mo)
                     {
-                        o = new HoconObject(v);
+                        o = new MutableHoconObject(v);
                         foreach(var obj in mo.Objects)
                             o.Merge(obj);
                     }
@@ -147,7 +147,7 @@ namespace Hocon
                 case HoconType.Array:
                     var a = v.GetArray();
                     v.Clear();
-                    var newArray = new HoconArray(v);
+                    var newArray = new MutableHoconArray(v);
                     foreach (var item in a)
                     {
                         Flatten(item);
@@ -164,13 +164,13 @@ namespace Hocon
                     var value = v.GetString();
                     v.Clear();
                     if (value == null)
-                        v.Add(new HoconNull(v));
+                        v.Add(new MutableHoconNull(v));
                     else if (value.NeedTripleQuotes())
-                        v.Add(new HoconTripleQuotedString(v, value));
+                        v.Add(new MutableHoconTripleQuotedString(v, value));
                     else if (value.NeedQuotes())
-                        v.Add(new HoconQuotedString(v, value));
+                        v.Add(new MutableHoconQuotedString(v, value));
                     else
-                        v.Add(new HoconUnquotedString(v, value));
+                        v.Add(new MutableHoconUnquotedString(v, value));
                     break;
             }
         }
@@ -179,7 +179,7 @@ namespace Hocon
         ///     Retrieves an enumerable key value pair representation of the current configuration.
         /// </summary>
         /// <returns>The current configuration represented as an enumerable key value pair.</returns>
-        public virtual IEnumerable<KeyValuePair<string, HoconField>> AsEnumerable()
+        public virtual IEnumerable<KeyValuePair<string, MutableHoconField>> AsEnumerable()
         {
             return Value.GetObject();
         }
@@ -230,7 +230,7 @@ namespace Hocon
             }
         }
 
-        public bool Equals(HoconRoot other)
+        public bool Equals(MutableRoot other)
         {
             return Value == other.Value;
         }
@@ -239,7 +239,7 @@ namespace Hocon
         {
             if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is HoconRoot root && Equals(root);
+            return obj is MutableRoot root && Equals(root);
         }
 
         #region Value getter methods
@@ -570,12 +570,12 @@ namespace Hocon
             return @default;
         }
 
-        public virtual HoconObject GetObject(string path)
+        public virtual MutableHoconObject GetObject(string path)
         {
             return WrapWithValueException(path, () => GetNode(path).GetObject());
         }
 
-        public virtual HoconObject GetObject(HoconPath path)
+        public virtual MutableHoconObject GetObject(HoconPath path)
         {
             return WrapWithValueException(path, () => GetNode(path).GetObject());
         }
@@ -586,7 +586,7 @@ namespace Hocon
         /// <param name="path">The path that contains the value to retrieve.</param>
         /// <param name="default">The default value to return if the value doesn't exist.</param>
         /// <returns>The double value defined in the specified path.</returns>
-        public virtual HoconObject GetObject(string path, HoconObject @default)
+        public virtual MutableHoconObject GetObject(string path, MutableHoconObject @default)
         {
             if (TryGetNode(path, out var value))
                 if (value.TryGetObject(out var result))
@@ -595,8 +595,8 @@ namespace Hocon
             return @default;
         }
 
-        /// <inheritdoc cref="GetObject(string,HoconObject)" />
-        public virtual HoconObject GetObject(HoconPath path, HoconObject @default = null)
+        /// <inheritdoc cref="GetObject(string,MutableHoconObject)" />
+        public virtual MutableHoconObject GetObject(HoconPath path, MutableHoconObject @default = null)
         {
             if (TryGetNode(path, out var value))
                 if (value.TryGetObject(out var result))
@@ -939,12 +939,12 @@ namespace Hocon
         /// <param name="path">The path that contains the objects to retrieve.</param>
         /// <returns>The list of objects defined in the specified path.</returns>
         /// <exception cref="HoconParserException">Thrown if path does not exist</exception>
-        public virtual IList<HoconObject> GetObjectList(string path)
+        public virtual IList<MutableHoconObject> GetObjectList(string path)
         {
             return WrapWithValueException(path, () => GetNode(path).GetObjectList());
         }
 
-        public virtual IList<HoconObject> GetObjectList(HoconPath path)
+        public virtual IList<MutableHoconObject> GetObjectList(HoconPath path)
         {
             return WrapWithValueException(path, () => GetNode(path).GetObjectList());
         }
@@ -955,7 +955,7 @@ namespace Hocon
         /// <param name="path">The path that contains the objects to retrieve.</param>
         /// <param name="default">The default value to return if the value doesn't exist.</param>
         /// <returns>The list of objects defined in the specified path.</returns>
-        public virtual IList<HoconObject> GetObjectList(string path, IList<HoconObject> @default)
+        public virtual IList<MutableHoconObject> GetObjectList(string path, IList<MutableHoconObject> @default)
         {
             if (TryGetNode(path, out var value))
                 if (value.TryGetObjectList(out var result))
@@ -965,7 +965,7 @@ namespace Hocon
         }
 
         /// <inheritdoc cref="GetObjectList(string)" />
-        public virtual IList<HoconObject> GetObjectList(HoconPath path, IList<HoconObject> @default = null)
+        public virtual IList<MutableHoconObject> GetObjectList(HoconPath path, IList<MutableHoconObject> @default = null)
         {
             if (TryGetNode(path, out var value))
                 if (value.TryGetObjectList(out var result))
@@ -975,27 +975,27 @@ namespace Hocon
         }
 
         /// <summary>
-        ///     Retrieves a <see cref="HoconValue" /> from a specific path.
+        ///     Retrieves a <see cref="MutableHoconValue" /> from a specific path.
         /// </summary>
         /// <param name="path">The path that contains the value to retrieve.</param>
-        /// <returns>The <see cref="HoconValue" /> found at the location if one exists, otherwise <c>null</c>.</returns>
-        public virtual HoconValue GetValue(string path)
+        /// <returns>The <see cref="MutableHoconValue" /> found at the location if one exists, otherwise <c>null</c>.</returns>
+        public virtual MutableHoconValue GetValue(string path)
         {
             return WrapWithValueException(path, () => GetNode(path));
         }
 
         /// <inheritdoc cref="GetValue(string)" />
-        public virtual HoconValue GetValue(HoconPath path)
+        public virtual MutableHoconValue GetValue(HoconPath path)
         {
             return WrapWithValueException(path, () => GetNode(path));
         }
 
-        public virtual bool TryGetValue(string path, out HoconValue result)
+        public virtual bool TryGetValue(string path, out MutableHoconValue result)
         {
             return TryGetNode(path, out result);
         }
 
-        public virtual bool TryGetValue(HoconPath path, out HoconValue result)
+        public virtual bool TryGetValue(HoconPath path, out MutableHoconValue result)
         {
             return TryGetNode(path, out result);
         }

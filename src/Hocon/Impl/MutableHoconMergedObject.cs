@@ -9,17 +9,17 @@ using System.Linq;
 
 namespace Hocon
 {
-    public sealed class HoconMergedObject : HoconObject
+    internal sealed class MutableHoconMergedObject : MutableHoconObject
     {
-        public HoconMergedObject(IHoconElement parent, List<HoconObject> objects) : base(parent)
+        public MutableHoconMergedObject(IMutableHoconElement parent, List<MutableHoconObject> objects) : base(parent)
         {
             Objects = objects;
             foreach (var obj in Objects) base.Merge(obj);
         }
 
-        public List<HoconObject> Objects { get; }
+        public List<MutableHoconObject> Objects { get; }
 
-        internal override HoconField TraversePath(HoconPath relativePath)
+        internal override MutableHoconField TraversePath(HoconPath relativePath)
         {
             var result = Objects.Last().TraversePath(relativePath);
             Clear();
@@ -28,7 +28,7 @@ namespace Hocon
             return result;
         }
 
-        internal override HoconField GetOrCreateKey(string key)
+        internal override MutableHoconField GetOrCreateKey(string key)
         {
             var result = Objects.Last().GetOrCreateKey(key);
             Clear();
@@ -37,15 +37,15 @@ namespace Hocon
             return result;
         }
 
-        internal override void SetField(string key, HoconField value)
+        internal override void SetField(string key, MutableHoconField value)
         {
             Objects.Last().SetField(key, value);
             base.SetField(key, value);
         }
 
-        public override void Merge(HoconObject other)
+        public override void Merge(MutableHoconObject other)
         {
-            var parent = (HoconValue) Parent;
+            var parent = (MutableHoconValue) Parent;
             parent.Add(other);
 
             Objects.Add(other);

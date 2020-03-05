@@ -9,13 +9,21 @@ using System.Collections.Generic;
 
 namespace Hocon
 {
-    /// <summary>
-    ///     This interface defines the contract needed to implement
-    ///     a HOCON (Human-Optimized Config Object Notation) element.
-    /// </summary>
-    public interface IHoconElement : IEquatable<IHoconElement>
+    internal interface IHoconElement : IEquatable<IHoconElement>
     {
-        IHoconElement Parent { get; }
+
+        HoconType Type { get; }
+
+        string Raw { get; }
+    }
+
+        /// <summary>
+        ///     This interface defines the contract needed to implement
+        ///     a HOCON (Human-Optimized Config Object Notation) element.
+        /// </summary>
+        internal interface IMutableHoconElement : IEquatable<IMutableHoconElement>
+    {
+        IMutableHoconElement Parent { get; }
 
         HoconType Type { get; }
 
@@ -25,7 +33,7 @@ namespace Hocon
         ///     Retrieves the HOCON object representation of this element.
         /// </summary>
         /// <returns>The HOCON object representation of this element.</returns>
-        HoconObject GetObject();
+        MutableHoconObject GetObject();
 
         /// <summary>
         ///     Retrieves the string representation of this element.
@@ -41,13 +49,13 @@ namespace Hocon
         ///     Retrieves a list of elements associated with this element.
         /// </summary>
         /// <returns>A list of elements associated with this element.</returns>
-        IList<HoconValue> GetArray();
+        IList<MutableHoconValue> GetArray();
 
         /// <summary>
         ///     Do deep copy of this element.
         /// </summary>
         /// <returns>A deep company of this element.</returns>
-        IHoconElement Clone(IHoconElement newParent);
+        IMutableHoconElement Clone(IMutableHoconElement newParent);
 
         /// <summary>
         ///     Retrieves the string representation of this element, indented for pretty printing.

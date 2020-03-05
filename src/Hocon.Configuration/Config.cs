@@ -20,14 +20,14 @@ namespace Hocon
     [Serializable]
     public class Config : HoconRoot, ISerializable, IEquatable<Config>
     {
-        private static readonly HoconValue EmptyValue;
+        private static readonly MutableHoconValue EmptyValue;
 
         private const string SerializedPropertyName = "_data";
 
         static Config()
         {
-            EmptyValue = new HoconValue(null);
-            EmptyValue.Add(new HoconObject(EmptyValue));
+            EmptyValue = new MutableHoconValue(null);
+            EmptyValue.Add(new MutableHoconObject(EmptyValue));
         }
 
         [Obsolete("For json serialization/deserialization only", true)]
@@ -39,25 +39,25 @@ namespace Hocon
         /// <summary>
         ///     Initializes a new instance of the <see cref="Config" /> class.
         /// </summary>
-        protected Config(HoconValue value)
+        protected Config(MutableHoconValue value)
         {
-            Value = (HoconValue)value.Clone(null);
-            Root = (HoconValue)value.Clone(null);
+            Value = (MutableHoconValue)value.Clone(null);
+            Root = (MutableHoconValue)value.Clone(null);
         }
 
-        /// <inheritdoc cref="Config(HoconValue)" />
-        protected Config(HoconValue value, Config fallback) : this(value)
+        /// <inheritdoc cref="Config(MutableHoconValue)" />
+        protected Config(MutableHoconValue value, Config fallback) : this(value)
         {
             MergeConfig(fallback);
         }
 
-        /// <inheritdoc cref="Config(HoconValue)" />
+        /// <inheritdoc cref="Config(MutableHoconValue)" />
         /// <param name="root">The root node to base this configuration.</param>
         /// <exception cref="T:System.ArgumentNullException">"The root value cannot be null."</exception>
         public Config(HoconRoot root)
         {
-            Value = (HoconValue)root.Value.Clone(null);
-            Root = (HoconValue)root.Value.Clone(null);
+            Value = (MutableHoconValue)root.Value.Clone(null);
+            Root = (MutableHoconValue)root.Value.Clone(null);
 
             if (!(root is Config cfg))
                 return;
@@ -68,7 +68,7 @@ namespace Hocon
             }
         }
 
-        /// <inheritdoc cref="Config(HoconValue)" />
+        /// <inheritdoc cref="Config(MutableHoconValue)" />
         /// <param name="root">The configuration to use as the primary source.</param>
         /// <param name="fallback">The configuration to use as a secondary source.</param>
         /// <exception cref="ArgumentNullException">The source configuration cannot be null.</exception>
@@ -85,15 +85,15 @@ namespace Hocon
         /// </remarks>
         public static Config Empty => CreateEmpty();
 
-        protected List<HoconValue> _fallbacks { get; } = new List<HoconValue>();
-        public virtual IReadOnlyList<HoconValue> Fallbacks => _fallbacks.ToList().AsReadOnly();
+        protected List<MutableHoconValue> _fallbacks { get; } = new List<MutableHoconValue>();
+        public virtual IReadOnlyList<MutableHoconValue> Fallbacks => _fallbacks.ToList().AsReadOnly();
 
         /// <summary>
         ///     Determines if this root node contains any values
         /// </summary>
         public virtual bool IsEmpty => Value == EmptyValue && _fallbacks.Count == 0;
 
-        public HoconValue Root { get; }
+        public MutableHoconValue Root { get; }
 
         /// <summary>
         ///     Returns string representation of <see cref="Config" />, allowing to include fallback values
@@ -107,7 +107,7 @@ namespace Hocon
             return Root.ToString();
         }
 
-        protected override bool TryGetNode(HoconPath path, out HoconValue result)
+        protected override bool TryGetNode(HoconPath path, out MutableHoconValue result)
         {
             result = null;
             var currentObject = Value.GetObject();
@@ -128,7 +128,7 @@ namespace Hocon
             return false;
         }
 
-        protected override HoconValue GetNode(HoconPath path)
+        protected override MutableHoconValue GetNode(HoconPath path)
         {
             var currentObject = Value.GetObject();
             if (currentObject.TryGetValue(path, out var returnValue))
@@ -193,9 +193,9 @@ namespace Hocon
             }
         }
 
-        private void InsertFallbackValue(HoconValue value)
+        private void InsertFallbackValue(MutableHoconValue value)
         {
-            HoconValue duplicateValue = null;
+            MutableHoconValue duplicateValue = null;
             foreach(var fallbackValue in _fallbacks)
             {
                 if(fallbackValue == value)
@@ -206,7 +206,7 @@ namespace Hocon
             }
             if (duplicateValue == null)
             {
-                var clone = (HoconValue)value.Clone(null);
+                var clone = (MutableHoconValue)value.Clone(null);
                 _fallbacks.Add(clone);
                 Root.GetObject().FallbackMerge(clone.GetObject());
             }
@@ -245,7 +245,7 @@ namespace Hocon
         }
 
         /// <inheritdoc />
-        public override IEnumerable<KeyValuePair<string, HoconField>> AsEnumerable()
+        public override IEnumerable<KeyValuePair<string, MutableHoconField>> AsEnumerable()
         {
             foreach (var kvp in Root.GetObject())
             {
@@ -255,8 +255,8 @@ namespace Hocon
 
         private static Config CreateEmpty()
         {
-            var value = new HoconValue(null);
-            value.Add(new HoconObject(value));
+            var value = new MutableHoconValue(null);
+            value.Add(new MutableHoconObject(value));
             return new Config(value);
         }
 

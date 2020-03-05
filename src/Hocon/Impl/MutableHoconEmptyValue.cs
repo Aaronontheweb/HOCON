@@ -9,14 +9,14 @@ using System.Collections.Generic;
 namespace Hocon
 {
     /// <summary>
-    ///     This class represents an empty <see cref="HoconValue" />,
+    ///     This class represents an empty <see cref="MutableHoconValue" />,
     ///     it masquerades as all other types and are usually used to represent empty or unresolved substitution.
     /// </summary>
-    public sealed class HoconEmptyValue : HoconValue
+    internal sealed class MutableHoconEmptyValue : MutableHoconValue
     {
-        public HoconEmptyValue() : base(null) { }
+        public MutableHoconEmptyValue() : base(null) { }
         
-        public HoconEmptyValue(IHoconElement parent) : base(parent)
+        public MutableHoconEmptyValue(IMutableHoconElement parent) : base(parent)
         {
         }
 
@@ -24,19 +24,19 @@ namespace Hocon
 
         public override string Raw => "";
 
-        public override void Add(IHoconElement value)
+        public override void Add(IMutableHoconElement value)
         {
-            throw new HoconException($"Can not add new value to {nameof(HoconEmptyValue)}");
+            throw new HoconException($"Can not add new value to {nameof(MutableHoconEmptyValue)}");
         }
 
-        public override void AddRange(IEnumerable<IHoconElement> values)
+        public override void AddRange(IEnumerable<IMutableHoconElement> values)
         {
-            throw new HoconException($"Can not add new values to {nameof(HoconEmptyValue)}");
+            throw new HoconException($"Can not add new values to {nameof(MutableHoconEmptyValue)}");
         }
 
-        public override HoconObject GetObject()
+        public override MutableHoconObject GetObject()
         {
-            return new HoconObject(Parent);
+            return new MutableHoconObject(Parent);
         }
 
         public override string GetString()
@@ -44,12 +44,12 @@ namespace Hocon
             return "";
         }
 
-        public override IList<HoconValue> GetArray()
+        public override IList<MutableHoconValue> GetArray()
         {
-            return new List<HoconValue>();
+            return new List<MutableHoconValue>();
         }
 
-        public override bool Equals(IHoconElement other)
+        public override bool Equals(IMutableHoconElement other)
         {
             if (other is null) return false;
             return other.Type == HoconType.Empty;
@@ -60,9 +60,9 @@ namespace Hocon
             return 0;
         }
 
-        public override IHoconElement Clone(IHoconElement newParent)
+        public override IMutableHoconElement Clone(IMutableHoconElement newParent)
         {
-            return new HoconEmptyValue(newParent);
+            return new MutableHoconEmptyValue(newParent);
         }
     }
 }

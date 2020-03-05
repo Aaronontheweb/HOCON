@@ -71,13 +71,13 @@ namespace Hocon.Immutable.Builder
 
         #endregion
 
-        public HoconImmutableLiteralBuilder Append(HoconValue value)
+        public HoconImmutableLiteralBuilder Append(MutableHoconValue value)
         {
             foreach (var element in value)
             {
-                if (!(element is HoconLiteral lit))
+                if (!(element is MutableHoconLiteral lit))
                     throw new HoconException(
-                        $"Can only add Hocon class of type {nameof(HoconLiteral)} and its derived classes into a literal builder.");
+                        $"Can only add Hocon class of type {nameof(MutableHoconLiteral)} and its derived classes into a literal builder.");
 
                 _builder.Append(lit.Value);
             }
@@ -85,7 +85,7 @@ namespace Hocon.Immutable.Builder
             return this;
         }
 
-        public HoconImmutableLiteralBuilder Append(HoconLiteral lit)
+        public HoconImmutableLiteralBuilder Append(MutableHoconLiteral lit)
         {
             if (lit.LiteralType != HoconLiteralType.Null)
                 _builder.Append(lit.Value);

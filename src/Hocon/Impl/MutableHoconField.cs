@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Hocon;
 
 namespace Hocon
 {
@@ -20,11 +21,11 @@ namespace Hocon
     /// }
     /// </code>
     /// </summary>
-    public sealed class HoconField : IHoconElement
+    internal sealed class MutableHoconField : IMutableHoconElement
     {
-        private readonly List<HoconValue> _internalValues = new List<HoconValue>();
+        private readonly List<MutableHoconValue> _internalValues = new List<MutableHoconValue>();
 
-        public HoconField(string key, HoconObject parent)
+        public MutableHoconField(string key, MutableHoconObject parent)
         {
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentNullException(nameof(key));
@@ -41,7 +42,7 @@ namespace Hocon
         /// </summary>
         internal bool HasOldValues => _internalValues.Count > 1;
 
-        public HoconValue Value
+        public MutableHoconValue Value
         {
             get
             {
@@ -53,14 +54,14 @@ namespace Hocon
                 if (lastValue.Type != HoconType.Object)
                     return lastValue;
 
-                var filteredValues = new List<HoconValue>();
+                var filteredValues = new List<MutableHoconValue>();
                 foreach (var value in _internalValues)
                     if (value.Type != HoconType.Object && value.Type != HoconType.Empty)
                         filteredValues.Clear();
                     else
                         filteredValues.Add(value);
 
-                var returnValue = new HoconValue(this);
+                var returnValue = new MutableHoconValue(this);
                 foreach (var value in filteredValues)
                     returnValue.AddRange(value);
                 return returnValue;
@@ -68,7 +69,7 @@ namespace Hocon
         }
 
         /// <inheritdoc />
-        public IHoconElement Parent { get; }
+        public IMutableHoconElement Parent { get; }
 
         /// <inheritdoc />
         public HoconType Type => Value == null ? HoconType.Empty : Value.Type;
@@ -77,7 +78,7 @@ namespace Hocon
         public string Raw => Value.Raw;
 
         /// <inheritdoc />
-        public HoconObject GetObject()
+        public MutableHoconObject GetObject()
         {
             return Value.GetObject();
         }
@@ -88,15 +89,15 @@ namespace Hocon
             return Value.GetString();
         }
 
-        public IList<HoconValue> GetArray()
+        public IList<MutableHoconValue> GetArray()
         {
             return Value.GetArray();
         }
 
-        public IHoconElement Clone(IHoconElement newParent)
+        public IMutableHoconElement Clone(IMutableHoconElement newParent)
         {
-            var newField = new HoconField(Key, (HoconObject) newParent);
-            foreach (var internalValue in _internalValues) newField._internalValues.Add(internalValue.Clone(newField) as HoconValue);
+            var newField = new MutableHoconField(Key, (MutableHoconObject) newParent);
+            foreach (var internalValue in _internalValues) newField._internalValues.Add(internalValue.Clone(newField) as MutableHoconValue);
             return newField;
         }
 
@@ -105,24 +106,24 @@ namespace Hocon
             return Value.ToString(indent, indentSize);
         }
 
-        public bool Equals(IHoconElement other)
+        public bool Equals(IMutableHoconElement other)
         {
             if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
-            return other is HoconField field && Path.Equals(field.Path) && Value.Equals(other);
+            return other is MutableHoconField field && Path.Equals(field.Path) && Value.Equals(other);
         }
 
         internal void EnsureFieldIsObject()
         {
             if (Type == HoconType.Object) return;
 
-            var v = new HoconValue(this);
-            var o = new HoconObject(v);
+            var v = new MutableHoconValue(this);
+            var o = new MutableHoconObject(v);
             v.Add(o);
             _internalValues.Add(v);
         }
 
-        internal void SetValue(HoconValue value)
+        internal void SetValue(MutableHoconValue value)
         {
             if (value == null)
                 return;
@@ -144,9 +145,9 @@ namespace Hocon
                 _internalValues.RemoveAt(_internalValues.Count - 1);
         }
 
-        internal HoconValue OlderValueThan(IHoconElement marker)
+        internal MutableHoconValue OlderValueThan(IMutableHoconElement marker)
         {
-            var filteredObjectValue = new List<HoconValue>();
+            var filteredObjectValue = new List<MutableHoconValue>();
             var index = 0;
             while (index < _internalValues.Count)
             {
@@ -172,17 +173,17 @@ namespace Hocon
             if (filteredObjectValue.Count == 0)
                 return index == 0 ? null : _internalValues[index - 1];
 
-            var result = new HoconValue(this);
+            var result = new MutableHoconValue(this);
             foreach (var value in filteredObjectValue) result.AddRange(value);
 
             return result;
         }
 
-        internal void ResolveValue(HoconValue value)
+        internal void ResolveValue(MutableHoconValue value)
         {
             if (value.Type != HoconType.Empty)
                 return;
-            ((HoconObject) Parent).ResolveValue(this);
+            ((MutableHoconObject) Parent).ResolveValue(this);
         }
 
         public override string ToString()
@@ -192,7 +193,7 @@ namespace Hocon
 
         public override bool Equals(object obj)
         {
-            return obj is IHoconElement element && Equals(element);
+            return obj is IMutableHoconElement element && Equals(element);
         }
 
         public override int GetHashCode()
@@ -203,12 +204,12 @@ namespace Hocon
             }
         }
 
-        public static bool operator ==(HoconField left, HoconField right)
+        public static bool operator ==(MutableHoconField left, MutableHoconField right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(HoconField left, HoconField right)
+        public static bool operator !=(MutableHoconField left, MutableHoconField right)
         {
             return !Equals(left, right);
         }

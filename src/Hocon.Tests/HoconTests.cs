@@ -408,7 +408,7 @@ A {
             emptyConfig.Invoking(c => c.GetLongList(missingKey)).Should().Throw<HoconValueException>().Which
                 .InnerException.Should().BeOfType<KeyNotFoundException>();
 
-            emptyConfig.GetObjectList(missingKey, new List<HoconObject>()).Should().Equal(new List<HoconObject>());
+            emptyConfig.GetObjectList(missingKey, new List<MutableHoconObject>()).Should().Equal(new List<MutableHoconObject>());
             emptyConfig.Invoking(c => c.GetObjectList(missingKey)).Should().Throw<HoconValueException>().Which
                 .InnerException.Should().BeOfType<KeyNotFoundException>();
 
@@ -509,12 +509,12 @@ a {
             Assert.Contains("d", b.Keys);
 
             Assert.NotNull(b["c"]);
-            Assert.IsType<HoconField>(b["c"]);
-            Assert.Equal(1, ((HoconField) b["c"]).Value.GetInt());
+            Assert.IsType<MutableHoconField>(b["c"]);
+            Assert.Equal(1, ((MutableHoconField) b["c"]).Value.GetInt());
 
             Assert.NotNull(b["d"]);
-            Assert.IsType<HoconField>(b["d"]);
-            Assert.True(((HoconField) b["d"]).Value.GetBoolean());
+            Assert.IsType<MutableHoconField>(b["d"]);
+            Assert.True(((MutableHoconField) b["d"]).Value.GetBoolean());
         }
 
         [Fact]

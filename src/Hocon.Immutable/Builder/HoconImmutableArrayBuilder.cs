@@ -11,13 +11,13 @@ namespace Hocon.Immutable.Builder
 {
     public sealed class HoconImmutableArrayBuilder : List<HoconImmutableElement>
     {
-        public HoconImmutableArrayBuilder AddRange(HoconArray array)
+        public HoconImmutableArrayBuilder AddRange(MutableHoconArray array)
         {
             foreach (var element in array) Add(element.ToHoconImmutable());
             return this;
         }
 
-        public HoconImmutableArrayBuilder AddRange(HoconValue value)
+        public HoconImmutableArrayBuilder AddRange(MutableHoconValue value)
         {
             foreach (var element in value.GetArray()) Add(element.ToHoconImmutable());
             return this;

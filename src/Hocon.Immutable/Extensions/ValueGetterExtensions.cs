@@ -43,27 +43,27 @@ namespace Hocon.Immutable.Extensions
         }
 
         /// <summary>
-        ///     Retrieves the decimal value from this <see cref="HoconValue" />.
+        ///     Retrieves the decimal value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The decimal value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The decimal value represented by this <see cref="MutableHoconValue" />.</returns>
         public static decimal GetDecimal(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the float value from this <see cref="HoconValue" />.
+        ///     Retrieves the float value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The float value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The float value represented by this <see cref="MutableHoconValue" />.</returns>
         public static float GetFloat(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the double value from this <see cref="HoconValue" />.
+        ///     Retrieves the double value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The double value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The double value represented by this <see cref="MutableHoconValue" />.</returns>
         public static double GetDouble(this HoconImmutableElement element)
         {
             return element;
@@ -75,90 +75,90 @@ namespace Hocon.Immutable.Extensions
         }
 
         /// <summary>
-        ///     Retrieves the unsigned long value from this <see cref="HoconValue" />.
+        ///     Retrieves the unsigned long value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The unsigned long value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The unsigned long value represented by this <see cref="MutableHoconValue" />.</returns>
         public static ulong GetULong(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the long value from this <see cref="HoconValue" />.
+        ///     Retrieves the long value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The long value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The long value represented by this <see cref="MutableHoconValue" />.</returns>
         public static long GetLong(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the unsigned integer value from this <see cref="HoconValue" />.
+        ///     Retrieves the unsigned integer value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The unsigned integer value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The unsigned integer value represented by this <see cref="MutableHoconValue" />.</returns>
         public static uint GetUInt(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the integer value from this <see cref="HoconValue" />.
+        ///     Retrieves the integer value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The integer value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The integer value represented by this <see cref="MutableHoconValue" />.</returns>
         public static int GetInt(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the unsigned short value from this <see cref="HoconValue" />.
+        ///     Retrieves the unsigned short value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The unsigned short value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The unsigned short value represented by this <see cref="MutableHoconValue" />.</returns>
         public static ushort GetUShort(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the short value from this <see cref="HoconValue" />.
+        ///     Retrieves the short value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The short value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The short value represented by this <see cref="MutableHoconValue" />.</returns>
         public static short GetShort(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the signed byte value from this <see cref="HoconValue" />.
+        ///     Retrieves the signed byte value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The signed byte value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The signed byte value represented by this <see cref="MutableHoconValue" />.</returns>
         public static sbyte GetSByte(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the byte value from this <see cref="HoconValue" />.
+        ///     Retrieves the byte value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The byte value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The byte value represented by this <see cref="MutableHoconValue" />.</returns>
         public static byte GetByte(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the time span value from this <see cref="HoconValue" />.
+        ///     Retrieves the time span value from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The time span value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The time span value represented by this <see cref="MutableHoconValue" />.</returns>
         public static TimeSpan GetTimeSpan(this HoconImmutableElement element)
         {
             return element;
         }
 
         /// <summary>
-        ///     Retrieves the long value, optionally suffixed with a 'b', from this <see cref="HoconValue" />.
+        ///     Retrieves the long value, optionally suffixed with a 'b', from this <see cref="MutableHoconValue" />.
         /// </summary>
-        /// <returns>The long value represented by this <see cref="HoconValue" />.</returns>
+        /// <returns>The long value represented by this <see cref="MutableHoconValue" />.</returns>
         public static long? GetByteSize(this HoconImmutableElement element)
         {
             if (!(element is HoconImmutableLiteral lit))
